@@ -20,9 +20,14 @@ export function KanbanColumn({
   onDeleteTask,
 }: KanbanColumnProps) {
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card overflow-hidden">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
       {/* Column header */}
-      <div className="flex items-center justify-between px-3.5 py-3 border-b border-border">
+      <div
+        className="flex items-center justify-between border-b border-border px-3.5 py-3"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in oklch, ${column.color} 16%, var(--card)), var(--card))`,
+        }}
+      >
         <div className="flex items-center gap-2.5">
           <span
             className="w-2.5 h-2.5 rounded-full"
