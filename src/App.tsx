@@ -1,20 +1,4 @@
-/**
- * App.tsx
- *
- * Root component. Wires together DragDropContext, kanban columns,
- * the modal, and the analytics row.
- *
- * ARCHITECTURE NOTES
- * ──────────────────
- * - useTasksStore  → persisted tasks (Zustand + localStorage)
- * - useUIStore     → ephemeral UI flags (dark mode, modal, search, filters)
- * - useTasks()     → derived + filtered views of tasks (custom hook)
- * - TanStack Query → swap useTasksStore for useQuery/useMutation when
- *                    a REST/GraphQL backend is added; the component tree
- *                    stays identical
- */
-
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { Moon, Sun, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -31,7 +15,6 @@ import type { Task, TaskFormData } from './types';
 import { cn } from './lib/utils';
 
 export default function App() {
-  // ── Store actions ──────────────────────────────────────────────────────────
   const { addTask, updateTask, deleteTask, moveTask, reorderTasks } =
     useTasksStore();
   const {

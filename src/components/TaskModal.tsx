@@ -1,12 +1,3 @@
-/**
- * components/TaskModal.tsx
- *
- * Modal form for creating and editing tasks.
- * Uses Radix Dialog (via shadcn/ui) for accessible focus-trap & escape-key handling.
- * React Hook Form + Zod handles validation without extra boilerplate.
- */
-
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';

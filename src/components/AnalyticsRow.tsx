@@ -1,11 +1,3 @@
-/**
- * components/AnalyticsRow.tsx
- *
- * Top summary row: stat cards + Recharts donut chart.
- * Pure presentational — receives data as props.
- */
-
-import React from 'react';
 import {
   PieChart,
   Pie,

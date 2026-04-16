@@ -1,11 +1,3 @@
-/**
- * components/KanbanColumn.tsx
- *
- * Wraps @hello-pangea/dnd <Droppable> and renders a list of TaskCards.
- * The Droppable snapshot is used to visually indicate a valid drop target.
- */
-
-import React from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus } from 'lucide-react';
 import { TaskCard } from './TaskCard';
@@ -73,7 +65,7 @@ export function KanbanColumn({
                       onDelete={onDeleteTask}
                       innerRef={dragProvided.innerRef}
                       draggableProps={dragProvided.draggableProps}
-                      dragHandleProps={dragProvided.dragHandleProps}
+                      dragHandleProps={dragProvided.dragHandleProps ?? undefined}
                     />
                   </div>
                 )}

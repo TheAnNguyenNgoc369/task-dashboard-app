@@ -1,10 +1,3 @@
-/**
- * hooks/useTasks.ts
- *
- * Encapsulates filtered task access and analytics computation.
- * Keeps components thin — they call hooks, not selectors directly.
- */
-
 import { useMemo } from 'react';
 import { useTasksStore } from '../store/tasks';
 import { useUIStore } from '../store/ui';

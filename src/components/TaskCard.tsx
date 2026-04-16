@@ -1,11 +1,3 @@
-/**
- * components/TaskCard.tsx
- *
- * Reusable draggable task card.
- * Receives the task data and callbacks — no store access inside.
- * This keeps it pure and easily testable.
- */
-
 import React from 'react';
 import { Pencil, Trash2, Calendar, GripVertical } from 'lucide-react';
 import type { Task } from '../types';

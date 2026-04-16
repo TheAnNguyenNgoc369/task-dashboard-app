@@ -1,20 +1,5 @@
-/**
- * store/tasks.ts
- *
- * TanStack Query handles *server* data fetching (cache, refetch, loading states).
- * Zustand handles *client* UI state (selected item, modal open, filter values).
- *
- * For a localStorage-backed offline app like this one, Zustand's persist
- * middleware replaces TanStack Query's role — but in a real app with an API,
- * you would:
- *   - useQuery(queryKey, fetchTasks)  → read from server
- *   - useMutation(updateTask)         → write to server + invalidate cache
- *   - useUIStore                      → purely ephemeral UI state
- */
-
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
 import type { Task, TaskFormData, Column } from '../types';
 import { SAMPLE_TASKS } from '../lib/sampleData';
 
@@ -29,7 +14,7 @@ interface TasksState {
 
 export const useTasksStore = create<TasksState>()(
   persist(
-    immer((set, get) => ({
+    (set) => ({
       tasks: SAMPLE_TASKS,
 
       addTask: (data) => {
@@ -40,34 +25,39 @@ export const useTasksStore = create<TasksState>()(
           createdAt: now,
           updatedAt: now,
         };
-        set((s) => { s.tasks.push(task); });
+        set((s) => ({ tasks: [...s.tasks, task] }));
         return task;
       },
 
       updateTask: (id, data) =>
-        set((s) => {
-          const task = s.tasks.find((t) => t.id === id);
-          if (task) Object.assign(task, data, { updatedAt: new Date().toISOString() });
-        }),
+        set((s) => ({
+          tasks: s.tasks.map((task) =>
+            task.id === id ? { ...task, ...data, updatedAt: new Date().toISOString() } : task
+          ),
+        })),
 
       deleteTask: (id) =>
-        set((s) => { s.tasks = s.tasks.filter((t) => t.id !== id); }),
+        set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 
       moveTask: (id, col) =>
-        set((s) => {
-          const task = s.tasks.find((t) => t.id === id);
-          if (task) { task.col = col; task.updatedAt = new Date().toISOString(); }
-        }),
+        set((s) => ({
+          tasks: s.tasks.map((task) =>
+            task.id === id ? { ...task, col, updatedAt: new Date().toISOString() } : task
+          ),
+        })),
 
       reorderTasks: (col, fromIndex, toIndex) =>
         set((s) => {
           const colTasks = s.tasks.filter((t) => t.col === col);
           const [moved] = colTasks.splice(fromIndex, 1);
+          if (!moved) {
+            return { tasks: s.tasks };
+          }
           colTasks.splice(toIndex, 0, moved);
           const others = s.tasks.filter((t) => t.col !== col);
-          s.tasks = [...others, ...colTasks];
+          return { tasks: [...others, ...colTasks] };
         }),
-    })),
+    }),
     {
       name: 'mc_tasks',
       storage: createJSONStorage(() => localStorage),
