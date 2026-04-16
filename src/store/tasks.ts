@@ -60,7 +60,23 @@ export const useTasksStore = create<TasksState>()(
     }),
     {
       name: 'mc_tasks',
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState) => {
+        const state = persistedState as { tasks?: Array<Omit<Task, 'col'> & { col?: string }> } | undefined;
+
+        if (!state?.tasks) {
+          return { tasks: SAMPLE_TASKS };
+        }
+
+        return {
+          ...state,
+          tasks: state.tasks.map((task) => ({
+            ...task,
+            col: task.col === 'backlog' ? 'planning' : (task.col as Column),
+          })),
+        };
+      },
     }
   )
 );

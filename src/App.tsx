@@ -1,18 +1,25 @@
-import { useCallback, useEffect } from 'react';
+import { Suspense, lazy, useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown, ClipboardList } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
 import { KanbanColumn } from './components/KanbanColumn';
-import { TaskModal } from './components/TaskModal';
-import { AnalyticsRow } from './components/AnalyticsRow';
-
 import { useTasksStore } from './store/tasks';
 import { useUIStore } from './store/ui';
 import { useTasks, useTask } from './hooks/useTasks';
 import { KANBAN_COLUMNS, CATEGORIES } from './lib/sampleData';
 import type { Task, TaskFormData } from './types';
 import { cn } from './lib/utils';
+
+const TaskModal = lazy(async () => {
+  const mod = await import('./components/TaskModal');
+  return { default: mod.TaskModal };
+});
+
+const AnalyticsRow = lazy(async () => {
+  const mod = await import('./components/AnalyticsRow');
+  return { default: mod.AnalyticsRow };
+});
 
 export default function App() {
   const { addTask, updateTask, deleteTask, moveTask, reorderTasks } =
@@ -115,7 +122,9 @@ export default function App() {
         </header>
 
         {/* ── Analytics row ─────────────────────────────────────────────────── */}
-        <AnalyticsRow data={analytics} />
+        <Suspense fallback={<div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" />}>
+          <AnalyticsRow data={analytics} />
+        </Suspense>
 
         {/* ── Search & filter bar ───────────────────────────────────────────── */}
         <div className="flex gap-2 mb-4 flex-wrap">
@@ -173,24 +182,26 @@ export default function App() {
       </div>
 
       {/* ── Task Modal ────────────────────────────────────────────────────────── */}
-      <TaskModal
-        open={modalOpen}
-        onClose={closeModal}
-        onSubmit={handleModalSubmit}
-        mode={editingTaskId ? 'edit' : 'create'}
-        defaultValues={
-          editingTask
-            ? {
-                title: editingTask.title,
-                desc: editingTask.desc,
-                priority: editingTask.priority,
-                category: editingTask.category,
-                col: editingTask.col,
-                due: editingTask.due,
-              }
-            : { col: (activeColumn as Task['col']) ?? 'planning' }
-        }
-      />
+      <Suspense fallback={null}>
+        <TaskModal
+          open={modalOpen}
+          onClose={closeModal}
+          onSubmit={handleModalSubmit}
+          mode={editingTaskId ? 'edit' : 'create'}
+          defaultValues={
+            editingTask
+              ? {
+                  title: editingTask.title,
+                  desc: editingTask.desc,
+                  priority: editingTask.priority,
+                  category: editingTask.category,
+                  col: editingTask.col,
+                  due: editingTask.due,
+                }
+              : { col: (activeColumn as Task['col']) ?? 'planning' }
+          }
+        />
+      </Suspense>
 
       {/* ── Toast notifications ───────────────────────────────────────────────── */}
       <Toaster position="bottom-right" richColors />
