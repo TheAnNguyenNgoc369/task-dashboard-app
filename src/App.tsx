@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown, ClipboardList } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
 import { KanbanColumn } from './components/KanbanColumn';
@@ -85,8 +85,8 @@ export default function App() {
         {/* ── Top bar ──────────────────────────────────────────────────────── */}
         <header className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground">
-              MC
+            <div className="group flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-gradient-to-br from-primary to-violet-500 text-primary-foreground shadow-[0_12px_24px_-14px_rgba(99,102,241,0.75)] transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_16px_28px_-12px_rgba(99,102,241,0.85)]">
+              <ClipboardList size={20} className="transition-transform duration-200 group-hover:scale-110" />
             </div>
             <div>
               <h1 className="text-xl font-semibold leading-none text-foreground">
@@ -99,16 +99,16 @@ export default function App() {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleDark}
-              className="rounded-lg border border-border bg-card p-2.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-accent hover:text-foreground"
               aria-label="Toggle dark mode"
             >
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button
               onClick={() => openModal()}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="group flex h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-primary via-violet-500 to-fuchsia-500 px-4 text-sm font-semibold text-white shadow-[0_14px_28px_-14px_rgba(99,102,241,0.85)] transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:from-violet-500 hover:via-primary hover:to-pink-500 hover:shadow-[0_18px_30px_-12px_rgba(168,85,247,0.9)]"
             >
-              <Plus size={17} />
+              <Plus size={17} className="transition-transform duration-200 group-hover:rotate-90" />
               New task
             </button>
           </div>
