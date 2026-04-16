@@ -49,13 +49,14 @@ export const TaskCard = React.memo(function TaskCard({
       {/* Drag handle */}
       <div
         {...dragHandleProps}
-        className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-40 cursor-grab active:cursor-grabbing transition-opacity"
+        className="absolute inset-y-1 left-1 flex w-9 items-center justify-center rounded-lg cursor-grab active:cursor-grabbing bg-muted/40 text-muted-foreground opacity-70 transition-all hover:bg-muted hover:text-foreground hover:opacity-100"
+        aria-label="Drag task"
       >
-        <GripVertical size={14} />
+        <GripVertical size={16} />
       </div>
 
       {/* Header row */}
-      <div className="flex items-start justify-between gap-2 mb-2.5 pl-2">
+      <div className="mb-2.5 flex items-start justify-between gap-2 pl-8">
         <p className="text-[13px] font-medium leading-snug text-foreground line-clamp-2 dark:text-white">
           {task.title}
         </p>
@@ -79,7 +80,7 @@ export const TaskCard = React.memo(function TaskCard({
       </div>
 
       {/* Metadata row */}
-      <div className="flex items-center gap-1.5 flex-wrap pl-2">
+      <div className="flex flex-wrap items-center gap-1.5 pl-8">
         {/* Priority badge */}
         <span
           className={cn(
@@ -114,7 +115,7 @@ export const TaskCard = React.memo(function TaskCard({
 
       {/* Optional description preview */}
       {task.desc && (
-        <p className="mt-2 pl-2 text-[11px] text-muted-foreground line-clamp-1 dark:text-slate-300">
+        <p className="mt-2 pl-8 text-[11px] text-muted-foreground line-clamp-1 dark:text-slate-300">
           {task.desc}
         </p>
       )}
