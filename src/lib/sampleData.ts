@@ -1,7 +1,7 @@
 import type { Task, KanbanColumn } from '../types';
 
 export const KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: 'backlog',  label: 'Backlog',     color: '#818cf8' },
+  { id: 'planning',  label: 'Planning',     color: '#818cf8' },
   { id: 'progress', label: 'In Progress', color: '#f97316' },
   { id: 'done',     label: 'Done',        color: '#22c55e' },
 ];
@@ -17,13 +17,13 @@ export const SAMPLE_TASKS: Task[] = [
   },
   {
     id: 'sample_2', title: 'Set up CI/CD pipeline for staging',
-    priority: 'high', category: 'Work', col: 'backlog',
+    priority: 'high', category: 'Work', col: 'planning',
     due: '2026-04-22', desc: '',
     createdAt: '2026-04-02T09:00:00Z', updatedAt: '2026-04-02T09:00:00Z',
   },
   {
     id: 'sample_3', title: 'Write unit tests for auth module',
-    priority: 'med', category: 'Work', col: 'backlog',
+    priority: 'med', category: 'Work', col: 'planning',
     due: '2026-04-25', desc: '',
     createdAt: '2026-04-03T09:00:00Z', updatedAt: '2026-04-03T09:00:00Z',
   },
@@ -47,7 +47,7 @@ export const SAMPLE_TASKS: Task[] = [
   },
   {
     id: 'sample_7', title: 'Migrate legacy API endpoints to v2',
-    priority: 'high', category: 'Urgent', col: 'backlog',
+    priority: 'high', category: 'Urgent', col: 'planning',
     due: '2026-04-30', desc: 'Breaking changes in v2 response shape',
     createdAt: '2026-04-05T09:00:00Z', updatedAt: '2026-04-05T09:00:00Z',
   },

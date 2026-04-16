@@ -14,14 +14,14 @@ interface AnalyticsRowProps {
 const PIE_DATA_KEYS = [
   { key: 'done',     label: 'Done',        color: '#22c55e' },
   { key: 'progress', label: 'In Progress', color: '#f97316' },
-  { key: 'backlog',  label: 'Backlog',     color: '#818cf8' },
+  { key: 'planning',  label: 'Planning',     color: '#818cf8' },
 ] as const;
 
 const STAT_CARDS = (d: AnalyticsData) => [
   { label: 'Total tasks', value: d.total, sub: `${d.highPriority} high priority`, color: '#2563eb' },
   { label: 'Completed', value: `${d.completionPct}%`, sub: `${d.done} of ${d.total} done`, color: '#22c55e' },
   { label: 'In progress', value: d.progress, sub: 'active tasks', color: '#f97316' },
-  { label: 'Backlog', value: d.backlog, sub: 'not started', color: '#6366f1' },
+  { label: 'Planning', value: d.planning, sub: 'not started', color: '#6366f1' },
 ];
 
 export function AnalyticsRow({ data }: AnalyticsRowProps) {

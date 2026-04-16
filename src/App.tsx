@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { Moon, Sun, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -28,6 +28,10 @@ export default function App() {
   // ── Derived data ───────────────────────────────────────────────────────────
   const { tasksByColumn, analytics } = useTasks();
   const editingTask = useTask(editingTaskId);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
 
   // ── Drag & drop ────────────────────────────────────────────────────────────
   const handleDragEnd = useCallback(
@@ -86,7 +90,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-xl font-semibold leading-none text-foreground">
-                Mission Control
+                Task Dashboard
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">Task Dashboard</p>
             </div>
@@ -180,7 +184,7 @@ export default function App() {
                 col: editingTask.col,
                 due: editingTask.due,
               }
-            : { col: (activeColumn as Task['col']) ?? 'backlog' }
+            : { col: (activeColumn as Task['col']) ?? 'planning' }
         }
       />
 

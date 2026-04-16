@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,7 +35,7 @@ const taskSchema = z.object({
   desc: z.string().max(400).optional(),
   priority: z.enum(['high', 'med', 'low']),
   category: z.enum(['Work', 'Personal', 'Urgent', 'Design', 'Research']),
-  col: z.enum(['backlog', 'progress', 'done']),
+  col: z.enum(['planning', 'progress', 'done']),
   due: z.string().optional(),
 });
 
@@ -60,11 +61,25 @@ export function TaskModal({
       desc: '',
       priority: 'med',
       category: 'Work',
-      col: (defaultValues?.col as Column) ?? 'backlog',
+      col: (defaultValues?.col as Column) ?? 'planning',
       due: '',
       ...defaultValues,
     },
   });
+
+  useEffect(() => {
+    if (!open) return;
+
+    form.reset({
+      title: '',
+      desc: '',
+      priority: 'med',
+      category: 'Work',
+      col: (defaultValues?.col as Column) ?? 'planning',
+      due: '',
+      ...defaultValues,
+    });
+  }, [defaultValues, form, open]);
 
   const handleSubmit = form.handleSubmit((data) => {
     onSubmit(data);
@@ -74,24 +89,29 @@ export function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[440px]">
+      <DialogContent className="max-w-[640px] bg-slate-50 text-popover-foreground dark:bg-card dark:text-white">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-foreground dark:text-white">
             {mode === 'edit' ? 'Edit task' : 'New task'}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-5 rounded-lg bg-slate-50 dark:bg-card dark:text-white">
             {/* Title */}
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="What needs to be done?" {...field} autoFocus />
+                    <Input
+                      placeholder="What needs to be done?"
+                      {...field}
+                      autoFocus
+                      className="h-11 text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,12 +124,12 @@ export function TaskModal({
               name="desc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Description</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Optional notes…"
-                      className="resize-none"
-                      rows={2}
+                      className="min-h-24 resize-none text-base"
+                      rows={3}
                       {...field}
                     />
                   </FormControl>
@@ -118,18 +138,18 @@ export function TaskModal({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Priority */}
               <FormField
                 control={form.control}
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Priority</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="w-full">
+                          <SelectValue className="text-foreground dark:text-white" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -149,11 +169,11 @@ export function TaskModal({
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Category</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="w-full">
+                          <SelectValue className="text-foreground dark:text-white" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -175,15 +195,15 @@ export function TaskModal({
                 name="col"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Status</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="w-full">
+                          <SelectValue className="text-foreground dark:text-white" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="backlog">Backlog</SelectItem>
+                        <SelectItem value="planning">Planning</SelectItem>
                         <SelectItem value="progress">In Progress</SelectItem>
                         <SelectItem value="done">Done</SelectItem>
                       </SelectContent>
@@ -199,9 +219,9 @@ export function TaskModal({
                 name="due"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Due date</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-foreground dark:text-white">Due date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" {...field} className="h-11 text-base" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

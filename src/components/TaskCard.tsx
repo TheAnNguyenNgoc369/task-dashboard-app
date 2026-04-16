@@ -41,8 +41,8 @@ export const TaskCard = React.memo(function TaskCard({
       ref={innerRef}
       {...draggableProps}
       className={cn(
-        'group relative rounded-xl border border-border bg-card p-3.5 transition-all duration-150',
-        'hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/5',
+        'group relative rounded-xl border border-border bg-gradient-to-br from-card to-secondary p-3.5 text-foreground shadow-sm transition-all duration-150 dark:from-card dark:to-secondary dark:text-white',
+        'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md hover:shadow-black/5',
         isDragging && 'opacity-50 scale-[0.97] shadow-lg rotate-1',
       )}
     >
@@ -56,7 +56,7 @@ export const TaskCard = React.memo(function TaskCard({
 
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 mb-2.5 pl-2">
-        <p className="text-[13px] font-medium leading-snug text-foreground line-clamp-2">
+        <p className="text-[13px] font-medium leading-snug text-foreground line-clamp-2 dark:text-white">
           {task.title}
         </p>
         {/* Action buttons — visible on hover */}
@@ -91,7 +91,7 @@ export const TaskCard = React.memo(function TaskCard({
         </span>
 
         {/* Category badge */}
-        <span className="text-[10px] px-2 py-0.5 rounded bg-secondary text-muted-foreground">
+        <span className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground dark:bg-muted dark:text-slate-200">
           {task.category}
         </span>
 
@@ -114,7 +114,7 @@ export const TaskCard = React.memo(function TaskCard({
 
       {/* Optional description preview */}
       {task.desc && (
-        <p className="mt-2 pl-2 text-[11px] text-muted-foreground line-clamp-1">
+        <p className="mt-2 pl-2 text-[11px] text-muted-foreground line-clamp-1 dark:text-slate-300">
           {task.desc}
         </p>
       )}

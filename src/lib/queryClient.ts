@@ -44,7 +44,7 @@ export const queryClient = new QueryClient({
 
 /**
  * Structured query key factory.
- * Lets you invalidate slices: invalidateQueries({ queryKey: tasksKeys.byCol('backlog') })
+ * Lets you invalidate slices: invalidateQueries({ queryKey: tasksKeys.byCol('planning') })
  */
 export const tasksKeys = {
   all:       ['tasks']                          as const,

@@ -102,7 +102,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ## Features
 
-- **Kanban board** — drag tasks between Backlog / In Progress / Done columns
+- **Kanban board** — drag tasks between Planning / In Progress / Done columns
 - **Analytics** — live donut chart + stat cards update on every change
 - **CRUD modal** — create and edit tasks with priority, category, and due date
 - **Search & filter** — real-time title/description search + category filter

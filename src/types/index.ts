@@ -1,6 +1,6 @@
 export type Priority = 'high' | 'med' | 'low';
 export type Category = 'Work' | 'Personal' | 'Urgent' | 'Design' | 'Research';
-export type Column = 'backlog' | 'progress' | 'done';
+export type Column = 'planning' | 'progress' | 'done';
 
 export interface Task {
   id: string;
@@ -33,7 +33,7 @@ export interface AnalyticsData {
   total: number;
   done: number;
   progress: number;
-  backlog: number;
+  planning: number;
   highPriority: number;
   completionPct: number;
 }

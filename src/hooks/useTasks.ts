@@ -25,7 +25,7 @@ export function useTasks() {
   const tasksByColumn = useMemo(
     () =>
       ({
-        backlog: filteredTasks.filter((t) => t.col === 'backlog'),
+        planning: filteredTasks.filter((t) => t.col === 'planning'),
         progress: filteredTasks.filter((t) => t.col === 'progress'),
         done: filteredTasks.filter((t) => t.col === 'done'),
       }) satisfies Record<Column, Task[]>,
@@ -36,13 +36,13 @@ export function useTasks() {
     const total = tasks.length;
     const done = tasks.filter((t) => t.col === 'done').length;
     const progress = tasks.filter((t) => t.col === 'progress').length;
-    const backlog = tasks.filter((t) => t.col === 'backlog').length;
+    const planning = tasks.filter((t) => t.col === 'planning').length;
     const highPriority = tasks.filter((t) => t.priority === 'high').length;
     return {
       total,
       done,
       progress,
-      backlog,
+      planning,
       highPriority,
       completionPct: total ? Math.round((done / total) * 100) : 0,
     };

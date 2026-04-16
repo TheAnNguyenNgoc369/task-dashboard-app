@@ -86,7 +86,7 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) 
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn("data-[error=true]:text-destructive", className)}
+      className={cn("text-foreground dark:text-white data-[error=true]:text-destructive", className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -114,7 +114,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("text-muted-foreground text-sm dark:text-slate-300", className)}
       {...props}
     />
   )
