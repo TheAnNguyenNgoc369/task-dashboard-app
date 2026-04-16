@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import { Moon, Sun, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
 import { KanbanColumn } from './components/KanbanColumn';
@@ -137,10 +137,14 @@ export default function App() {
               size={16}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
+            <ChevronDown
+              size={16}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="cursor-pointer appearance-none rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 min-w-[180px] cursor-pointer appearance-none rounded-xl border border-border/80 bg-white py-2.5 pl-10 pr-10 text-sm font-medium text-foreground shadow-[0_8px_20px_-14px_rgba(0,0,0,0.45)] outline-none transition-all hover:border-primary/40 hover:shadow-[0_10px_24px_-14px_rgba(99,102,241,0.45)] focus:border-ring focus:ring-3 focus:ring-ring/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             >
               <option value="All">All categories</option>
               {CATEGORIES.map((c) => (
