@@ -76,35 +76,35 @@ export default function App() {
 
   return (
     <div className={cn('min-h-screen bg-background transition-colors', dark && 'dark')}>
-      <div className="max-w-7xl mx-auto px-4 py-5">
+      <div className="mx-auto max-w-7xl px-4 py-6">
 
         {/* ── Top bar ──────────────────────────────────────────────────────── */}
         <header className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground">
               MC
             </div>
             <div>
-              <h1 className="text-[17px] font-semibold text-foreground leading-none">
+              <h1 className="text-xl font-semibold leading-none text-foreground">
                 Mission Control
               </h1>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Task Dashboard</p>
+              <p className="mt-1 text-sm text-muted-foreground">Task Dashboard</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={toggleDark}
-              className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="rounded-lg border border-border bg-card p-2.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               aria-label="Toggle dark mode"
             >
-              {dark ? <Sun size={16} /> : <Moon size={16} />}
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button
               onClick={() => openModal()}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              <Plus size={15} />
+              <Plus size={17} />
               New task
             </button>
           </div>
@@ -117,7 +117,7 @@ export default function App() {
         <div className="flex gap-2 mb-4 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
             <Search
-              size={14}
+              size={16}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
             <input
@@ -125,18 +125,18 @@ export default function App() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks…"
-              className="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div className="relative">
             <SlidersHorizontal
-              size={14}
+              size={16}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="pl-9 pr-3 py-2 text-[13px] rounded-lg border border-border bg-card text-foreground outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer appearance-none"
+              className="cursor-pointer appearance-none rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="All">All categories</option>
               {CATEGORIES.map((c) => (

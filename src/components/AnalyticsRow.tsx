@@ -18,10 +18,10 @@ const PIE_DATA_KEYS = [
 ] as const;
 
 const STAT_CARDS = (d: AnalyticsData) => [
-  { label: 'Total tasks',  value: d.total,            sub: `${d.highPriority} high priority`, color: undefined },
-  { label: 'Completed',    value: `${d.completionPct}%`, sub: `${d.done} of ${d.total} done`,  color: '#22c55e' },
-  { label: 'In progress',  value: d.progress,         sub: 'active tasks',                   color: '#f97316' },
-  { label: 'Backlog',      value: d.backlog,           sub: 'not started',                    color: '#818cf8' },
+  { label: 'Total tasks', value: d.total, sub: `${d.highPriority} high priority`, color: '#2563eb' },
+  { label: 'Completed', value: `${d.completionPct}%`, sub: `${d.done} of ${d.total} done`, color: '#22c55e' },
+  { label: 'In progress', value: d.progress, sub: 'active tasks', color: '#f97316' },
+  { label: 'Backlog', value: d.backlog, sub: 'not started', color: '#6366f1' },
 ];
 
 export function AnalyticsRow({ data }: AnalyticsRowProps) {
@@ -37,23 +37,27 @@ export function AnalyticsRow({ data }: AnalyticsRowProps) {
       {STAT_CARDS(data).map((card) => (
         <div
           key={card.label}
-          className="rounded-xl border border-border bg-card p-3.5"
+          className="rounded-xl border border-border bg-card p-4 shadow-sm"
+          style={{
+            background: `linear-gradient(135deg, color-mix(in oklch, ${card.color} 12%, var(--card)), var(--card))`,
+            boxShadow: `inset 0 1px 0 color-mix(in oklch, ${card.color} 16%, transparent)`,
+          }}
         >
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {card.label}
           </p>
           <p
-            className="text-2xl font-semibold tabular-nums"
-            style={card.color ? { color: card.color } : undefined}
+            className="text-3xl font-semibold tabular-nums"
+            style={{ color: card.color }}
           >
             {card.value}
           </p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{card.sub}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{card.sub}</p>
         </div>
       ))}
 
       {/* Pie chart card (spans 1 column) */}
-      <div className="rounded-xl border border-border bg-card p-3.5 flex items-center gap-4 col-span-2 sm:col-span-3 lg:col-span-1">
+      <div className="col-span-2 flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:col-span-3 lg:col-span-1">
         <ResponsiveContainer width={80} height={80}>
           <PieChart>
             <Pie
@@ -81,14 +85,14 @@ export function AnalyticsRow({ data }: AnalyticsRowProps) {
           </PieChart>
         </ResponsiveContainer>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {PIE_DATA_KEYS.map((d) => (
-            <div key={d.key} className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div key={d.key} className="flex items-center gap-2 text-sm text-muted-foreground">
               <span
-                className="w-2 h-2 rounded-full shrink-0"
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: d.color }}
               />
-              {d.label}: <span className="font-medium text-foreground">{data[d.key]}</span>
+              {d.label}: <span className="font-semibold text-foreground">{data[d.key]}</span>
             </div>
           ))}
         </div>
