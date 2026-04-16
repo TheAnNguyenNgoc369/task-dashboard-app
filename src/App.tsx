@@ -92,7 +92,7 @@ export default function App() {
               <h1 className="text-xl font-semibold leading-none text-foreground">
                 Task Dashboard
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">Task Dashboard</p>
+              <p className="mt-1 text-sm text-muted-foreground">A Kanban task dashboard built with React 18, Zustand, TanStack Query, and Tailwind CSS.</p>
             </div>
           </div>
 
