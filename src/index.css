@@ -101,3 +101,32 @@
   * { @apply border-border; }
   body { @apply bg-background text-foreground; font-family: system-ui, -apple-system, sans-serif; font-size: 17px; line-height: 1.5; }
 }
+
+/* ── Kanban board scrollbar ──────────────────────────────────────────────── */
+.kanban-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.78 0.05 262 / 0.45) transparent;
+}
+.kanban-scroll-area::-webkit-scrollbar {
+  height: 5px;
+}
+.kanban-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+.kanban-scroll-area::-webkit-scrollbar-thumb {
+  background: oklch(0.78 0.05 262 / 0.35);
+  border-radius: 999px;
+}
+.kanban-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.62 0.23 275 / 0.6);
+}
+.dark .kanban-scroll-area {
+  scrollbar-color: oklch(0.5 0.07 270 / 0.5) transparent;
+}
+.dark .kanban-scroll-area::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0.07 270 / 0.45);
+}
+.dark .kanban-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.74 0.21 284 / 0.7);
+}

@@ -40,6 +40,25 @@ export interface KanbanColumn {
   label: string;
   color: string;
   isDone?: boolean;
+  /** When false the column is hidden from the board (default true) */
+  visible?: boolean;
+}
+
+export type DashboardCardKind =
+  | 'total'
+  | 'completed'
+  | 'high_priority'
+  | 'column'
+  | 'distribution';
+
+/** Configurable analytics / dashboard stat card */
+export interface DashboardCard {
+  id: string;
+  title: string;
+  color: string;
+  kind: DashboardCardKind;
+  /** Required when kind === 'column' */
+  columnId?: string;
 }
 
 export interface AnalyticsData {

@@ -106,13 +106,7 @@ export default function App() {
     [deleteColumn]
   );
 
-  // Dynamic grid: 1 col on mobile, up to 4 on wide screens
-  const gridCols =
-    columns.length === 1 ? 'grid-cols-1' :
-    columns.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-    columns.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
-    'grid-cols-1 md:grid-cols-2 xl:grid-cols-4';
-
+  const visibleColumns = columns.filter((c) => c.visible !== false);
   const firstColId = columns[0]?.id ?? 'planning';
 
   return (
@@ -205,19 +199,22 @@ export default function App() {
 
         {/* ── Kanban board ──────────────────────────────────────────────────── */}
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className={cn('grid gap-3', gridCols)}>
-            {columns.map((col) => (
-              <KanbanColumn
-                key={col.id}
-                column={col}
-                tasks={tasksByColumn[col.id] ?? []}
-                onAddTask={(colId) => openModal(undefined, colId)}
-                onEditTask={(task) => openModal(task.id)}
-                onDeleteTask={handleDelete}
-                onEditColumn={handleEditColumn}
-                onDeleteColumn={handleDeleteColumn}
-              />
-            ))}
+          <div className="kanban-scroll-area overflow-x-auto pb-3">
+            <div className="flex gap-3" style={{ minWidth: `${visibleColumns.length * 308}px` }}>
+              {visibleColumns.map((col) => (
+                <div key={col.id} className="w-[296px] shrink-0">
+                  <KanbanColumn
+                    column={col}
+                    tasks={tasksByColumn[col.id] ?? []}
+                    onAddTask={(colId) => openModal(undefined, colId)}
+                    onEditTask={(task) => openModal(task.id)}
+                    onDeleteTask={handleDelete}
+                    onEditColumn={handleEditColumn}
+                    onDeleteColumn={handleDeleteColumn}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </DragDropContext>
 
