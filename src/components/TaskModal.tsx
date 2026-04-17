@@ -161,7 +161,7 @@ export function TaskModal({
                       <SelectContent>
                         {priorities.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
-                            {p.emoji} {p.label}
+                            {p.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

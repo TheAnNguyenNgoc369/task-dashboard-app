@@ -6,7 +6,6 @@ export interface PriorityDef {
   id: string;
   label: string;
   color: string;
-  emoji: string;
 }
 
 export interface CategoryDef {

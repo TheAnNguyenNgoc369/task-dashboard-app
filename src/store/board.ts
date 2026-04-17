@@ -9,9 +9,9 @@ export const DEFAULT_COLUMNS: KanbanColumn[] = [
 ];
 
 export const DEFAULT_PRIORITIES: PriorityDef[] = [
-  { id: 'high', label: 'High',   color: '#ef4444', emoji: '🔴' },
-  { id: 'med',  label: 'Medium', color: '#f97316', emoji: '🟠' },
-  { id: 'low',  label: 'Low',    color: '#22c55e', emoji: '🟢' },
+  { id: 'high', label: 'High',   color: '#ef4444' },
+  { id: 'med',  label: 'Medium', color: '#f97316' },
+  { id: 'low',  label: 'Low',    color: '#22c55e' },
 ];
 
 export const DEFAULT_CATEGORIES: CategoryDef[] = [
@@ -31,7 +31,7 @@ interface BoardState {
   updateColumn: (id: string, data: Partial<Omit<KanbanColumn, 'id'>>) => void;
   deleteColumn: (id: string) => void;
 
-  addPriority: (label: string, color: string, emoji: string) => void;
+  addPriority: (label: string, color: string) => void;
   updatePriority: (id: string, data: Partial<Omit<PriorityDef, 'id'>>) => void;
   deletePriority: (id: string) => void;
 
@@ -61,11 +61,11 @@ export const useBoardStore = create<BoardState>()(
       deleteColumn: (id) =>
         set((s) => ({ columns: s.columns.filter((c) => c.id !== id) })),
 
-      addPriority: (label, color, emoji) =>
+      addPriority: (label, color) =>
         set((s) => ({
           priorities: [
             ...s.priorities,
-            { id: `pri_${Date.now()}`, label, color, emoji },
+            { id: `pri_${Date.now()}`, label, color },
           ],
         })),
 
@@ -95,8 +95,20 @@ export const useBoardStore = create<BoardState>()(
     }),
     {
       name: 'mc_board',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState) => {
+        const s = persistedState as { priorities?: PriorityDef[] };
+        if (!s?.priorities) return persistedState;
+        return {
+          ...s,
+          priorities: s.priorities.map((p) => ({
+            id: p.id,
+            label: p.label,
+            color: p.color,
+          })),
+        };
+      },
     }
   )
 );

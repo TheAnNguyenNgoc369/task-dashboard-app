@@ -23,15 +23,12 @@ interface ManageModalProps {
 interface EditRowProps {
   label: string;
   color: string;
-  extra?: string; // e.g. emoji for priorities
-  onSave: (label: string, color: string, extra?: string) => void;
+  onSave: (label: string, color: string) => void;
   onCancel: () => void;
-  showExtra?: boolean;
 }
-function EditRow({ label, color, extra, onSave, onCancel, showExtra }: EditRowProps) {
+function EditRow({ label, color, onSave, onCancel }: EditRowProps) {
   const [l, setL] = useState(label);
   const [c, setC] = useState(color);
-  const [e, setE] = useState(extra ?? '');
   return (
     <div className="flex items-center gap-2 rounded-lg bg-accent/40 px-2 py-1.5">
       <input
@@ -41,28 +38,18 @@ function EditRow({ label, color, extra, onSave, onCancel, showExtra }: EditRowPr
         className="h-7 w-7 shrink-0 cursor-pointer rounded border border-border bg-transparent p-0.5"
         title="Pick colour"
       />
-      {showExtra && (
-        <input
-          type="text"
-          value={e}
-          onChange={(ev) => setE(ev.target.value)}
-          placeholder="emoji"
-          className="w-10 rounded border border-border bg-background px-1 py-0.5 text-sm text-center"
-          maxLength={2}
-        />
-      )}
       <Input
         value={l}
         onChange={(ev) => setL(ev.target.value)}
         className="h-7 flex-1 text-sm"
         onKeyDown={(ev) => {
-          if (ev.key === 'Enter') onSave(l.trim(), c, e.trim() || undefined);
+          if (ev.key === 'Enter') onSave(l.trim(), c);
           if (ev.key === 'Escape') onCancel();
         }}
         autoFocus
       />
       <button
-        onClick={() => l.trim() && onSave(l.trim(), c, e.trim() || undefined)}
+        onClick={() => l.trim() && onSave(l.trim(), c)}
         className="rounded-md p-1 text-green-600 hover:bg-green-100 dark:hover:bg-green-950"
         title="Save"
       >
@@ -82,21 +69,18 @@ function EditRow({ label, color, extra, onSave, onCancel, showExtra }: EditRowPr
 // ── Add new row ─────────────────────────────────────────────────────────────
 interface AddRowProps {
   placeholder: string;
-  onAdd: (label: string, color: string, extra?: string) => void;
-  showExtra?: boolean;
+  onAdd: (label: string, color: string) => void;
 }
-function AddRow({ placeholder, onAdd, showExtra }: AddRowProps) {
+function AddRow({ placeholder, onAdd }: AddRowProps) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [color, setColor] = useState('#6366f1');
-  const [emoji, setEmoji] = useState('');
 
   const commit = () => {
     if (!label.trim()) return;
-    onAdd(label.trim(), color, emoji.trim() || undefined);
+    onAdd(label.trim(), color);
     setLabel('');
     setColor('#6366f1');
-    setEmoji('');
     setOpen(false);
   };
 
@@ -121,16 +105,6 @@ function AddRow({ placeholder, onAdd, showExtra }: AddRowProps) {
         className="h-7 w-7 shrink-0 cursor-pointer rounded border border-border bg-transparent p-0.5"
         title="Pick colour"
       />
-      {showExtra && (
-        <input
-          type="text"
-          value={emoji}
-          onChange={(e) => setEmoji(e.target.value)}
-          placeholder="emoji"
-          className="w-10 rounded border border-border bg-background px-1 py-0.5 text-sm text-center"
-          maxLength={2}
-        />
-      )}
       <Input
         value={label}
         onChange={(e) => setLabel(e.target.value)}
@@ -305,10 +279,8 @@ function PrioritiesTab() {
             key={pri.id}
             label={pri.label}
             color={pri.color}
-            extra={pri.emoji}
-            showExtra
-            onSave={(label, color, emoji) => {
-              updatePriority(pri.id, { label, color, emoji: emoji ?? pri.emoji });
+            onSave={(label, color) => {
+              updatePriority(pri.id, { label, color });
               setEditingId(null);
             }}
             onCancel={() => setEditingId(null)}
@@ -322,7 +294,6 @@ function PrioritiesTab() {
               className="h-3 w-3 shrink-0 rounded-full"
               style={{ background: pri.color }}
             />
-            <span className="text-sm">{pri.emoji}</span>
             <span className="flex-1 text-sm text-foreground">{pri.label}</span>
             <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
               <button
@@ -345,8 +316,7 @@ function PrioritiesTab() {
       )}
       <AddRow
         placeholder="Add priority…"
-        onAdd={(label, color, emoji) => addPriority(label, color, emoji ?? '⚪')}
-        showExtra
+        onAdd={(label, color) => addPriority(label, color)}
       />
     </div>
   );

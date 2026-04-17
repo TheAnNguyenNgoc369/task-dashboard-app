@@ -87,7 +87,7 @@ export const TaskCard = React.memo(function TaskCard({
               color: priorityDef.color,
             }}
           >
-            {priorityDef.emoji} {priorityDef.label}
+            {priorityDef.label}
           </span>
         ) : (
           <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-muted text-muted-foreground">
