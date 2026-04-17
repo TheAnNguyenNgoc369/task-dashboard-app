@@ -1,6 +1,13 @@
 import { Suspense, lazy, useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown, ClipboardList, Settings } from 'lucide-react';
+import { Moon, Sun, Plus, Search, ClipboardList, Settings, X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Toaster, toast } from 'sonner';
 
 import { KanbanColumn } from './components/KanbanColumn';
@@ -172,29 +179,39 @@ export default function App() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks…"
-              className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className={cn(
+                'w-full rounded-lg border border-border bg-card py-2.5 pl-10 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20',
+                search.trim() ? 'pr-10' : 'pr-3'
+              )}
             />
+            {search.trim() !== '' && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-muted/60 text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X size={12} strokeWidth={2.5} />
+              </button>
+            )}
           </div>
-          <div className="relative">
-            <SlidersHorizontal
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <ChevronDown
-              size={16}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-11 min-w-[180px] cursor-pointer appearance-none rounded-xl border border-border/80 bg-white py-2.5 pl-10 pr-10 text-sm font-medium text-foreground shadow-[0_8px_20px_-14px_rgba(0,0,0,0.45)] outline-none transition-all hover:border-primary/40 hover:shadow-[0_10px_24px_-14px_rgba(99,102,241,0.45)] focus:border-ring focus:ring-3 focus:ring-ring/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-            >
-              <option value="All">All categories</option>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="h-11 min-w-[180px] w-full sm:w-[min(100%,220px)]">
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All categories</SelectItem>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.label}</option>
+                <SelectItem key={c.id} value={c.id}>
+                  <span
+                    className="mr-1.5 inline-block h-2 w-2 rounded-full"
+                    style={{ background: c.color }}
+                  />
+                  {c.label}
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* ── Kanban board ──────────────────────────────────────────────────── */}
