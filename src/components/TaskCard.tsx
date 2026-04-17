@@ -1,24 +1,16 @@
 import React from 'react';
 import { Pencil, Trash2, Calendar, GripVertical } from 'lucide-react';
 import type { Task } from '../types';
+import { useBoardStore } from '../store/board';
 import { formatDue } from '../hooks/useTasks';
 import { cn } from '../lib/utils';
-
-const PRIORITY_STYLES: Record<Task['priority'], string> = {
-  high: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
-  med:  'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
-  low:  'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
-};
-const PRIORITY_LABELS: Record<Task['priority'], string> = {
-  high: 'High', med: 'Medium', low: 'Low',
-};
 
 interface TaskCardProps {
   task: Task;
   isDragging?: boolean;
+  isDoneColumn?: boolean;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
-  /** Drag handlers passed from the DnD library */
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   draggableProps?: React.HTMLAttributes<HTMLDivElement>;
   innerRef?: (el: HTMLDivElement | null) => void;
@@ -27,14 +19,20 @@ interface TaskCardProps {
 export const TaskCard = React.memo(function TaskCard({
   task,
   isDragging = false,
+  isDoneColumn = false,
   onEdit,
   onDelete,
   dragHandleProps,
   draggableProps,
   innerRef,
 }: TaskCardProps) {
-  const isOverdue =
-    task.due && task.col !== 'done' && new Date(task.due) < new Date();
+  const priorities = useBoardStore((s) => s.priorities);
+  const categories = useBoardStore((s) => s.categories);
+
+  const priorityDef = priorities.find((p) => p.id === task.priority);
+  const categoryDef = categories.find((c) => c.id === task.category);
+
+  const isOverdue = task.due && !isDoneColumn && new Date(task.due) < new Date();
 
   return (
     <div
@@ -60,7 +58,6 @@ export const TaskCard = React.memo(function TaskCard({
         <p className="text-[13px] font-medium leading-snug text-foreground line-clamp-2 dark:text-white">
           {task.title}
         </p>
-        {/* Action buttons — visible on hover */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={() => onEdit(task)}
@@ -82,19 +79,38 @@ export const TaskCard = React.memo(function TaskCard({
       {/* Metadata row */}
       <div className="flex flex-wrap items-center gap-1.5 pl-8">
         {/* Priority badge */}
-        <span
-          className={cn(
-            'text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded',
-            PRIORITY_STYLES[task.priority],
-          )}
-        >
-          {PRIORITY_LABELS[task.priority]}
-        </span>
+        {priorityDef ? (
+          <span
+            className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded"
+            style={{
+              background: `color-mix(in oklch, ${priorityDef.color} 18%, var(--secondary))`,
+              color: priorityDef.color,
+            }}
+          >
+            {priorityDef.emoji} {priorityDef.label}
+          </span>
+        ) : (
+          <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-muted text-muted-foreground">
+            {task.priority}
+          </span>
+        )}
 
         {/* Category badge */}
-        <span className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground dark:bg-muted dark:text-slate-200">
-          {task.category}
-        </span>
+        {categoryDef ? (
+          <span
+            className="text-[10px] px-2 py-0.5 rounded"
+            style={{
+              background: `color-mix(in oklch, ${categoryDef.color} 14%, var(--secondary))`,
+              color: categoryDef.color,
+            }}
+          >
+            {categoryDef.label}
+          </span>
+        ) : (
+          <span className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground dark:bg-muted dark:text-slate-200">
+            {task.category}
+          </span>
+        )}
 
         {/* Due date */}
         {task.due && (

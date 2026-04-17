@@ -1,6 +1,19 @@
-export type Priority = 'high' | 'med' | 'low';
-export type Category = 'Work' | 'Personal' | 'Urgent' | 'Design' | 'Research';
-export type Column = 'planning' | 'progress' | 'done';
+export type Priority = string;
+export type Category = string;
+export type Column = string;
+
+export interface PriorityDef {
+  id: string;
+  label: string;
+  color: string;
+  emoji: string;
+}
+
+export interface CategoryDef {
+  id: string;
+  label: string;
+  color: string;
+}
 
 export interface Task {
   id: string;
@@ -24,16 +37,16 @@ export interface TaskFormData {
 }
 
 export interface KanbanColumn {
-  id: Column;
+  id: string;
   label: string;
   color: string;
+  isDone?: boolean;
 }
 
 export interface AnalyticsData {
   total: number;
-  done: number;
-  progress: number;
-  planning: number;
+  completedCount: number;
   highPriority: number;
   completionPct: number;
+  byColumn: Array<{ id: string; label: string; color: string; count: number }>;
 }

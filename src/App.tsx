@@ -1,14 +1,14 @@
 import { Suspense, lazy, useCallback, useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown, ClipboardList } from 'lucide-react';
+import { Moon, Sun, Plus, Search, SlidersHorizontal, ChevronDown, ClipboardList, Settings } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
 import { KanbanColumn } from './components/KanbanColumn';
 import { useTasksStore } from './store/tasks';
 import { useUIStore } from './store/ui';
+import { useBoardStore } from './store/board';
 import { useTasks, useTask } from './hooks/useTasks';
-import { KANBAN_COLUMNS, CATEGORIES } from './lib/sampleData';
-import type { Task, TaskFormData } from './types';
+import type { TaskFormData } from './types';
 import { cn } from './lib/utils';
 
 const TaskModal = lazy(async () => {
@@ -21,18 +21,23 @@ const AnalyticsRow = lazy(async () => {
   return { default: mod.AnalyticsRow };
 });
 
+const ManageModal = lazy(async () => {
+  const mod = await import('./components/ManageModal');
+  return { default: mod.ManageModal };
+});
+
 export default function App() {
-  const { addTask, updateTask, deleteTask, moveTask, reorderTasks } =
-    useTasksStore();
+  const { addTask, updateTask, deleteTask, moveTask, reorderTasks } = useTasksStore();
   const {
     dark, toggleDark,
     search, setSearch,
     categoryFilter, setCategoryFilter,
     modalOpen, editingTaskId, activeColumn,
     openModal, closeModal,
+    manageOpen, openManage, closeManage,
   } = useUIStore();
+  const { columns, categories, updateColumn, deleteColumn } = useBoardStore();
 
-  // ── Derived data ───────────────────────────────────────────────────────────
   const { tasksByColumn, analytics } = useTasks();
   const editingTask = useTask(editingTaskId);
 
@@ -51,15 +56,15 @@ export default function App() {
       ) return;
 
       if (source.droppableId !== destination.droppableId) {
-        moveTask(draggableId, destination.droppableId as Task['col']);
+        moveTask(draggableId, destination.droppableId);
         toast.success(
-          `Moved to ${KANBAN_COLUMNS.find((c) => c.id === destination.droppableId)?.label}`
+          `Moved to ${columns.find((c) => c.id === destination.droppableId)?.label ?? destination.droppableId}`
         );
       } else {
-        reorderTasks(source.droppableId as Task['col'], source.index, destination.index);
+        reorderTasks(source.droppableId, source.index, destination.index);
       }
     },
-    [moveTask, reorderTasks]
+    [moveTask, reorderTasks, columns]
   );
 
   // ── Modal handlers ─────────────────────────────────────────────────────────
@@ -85,9 +90,34 @@ export default function App() {
     [deleteTask]
   );
 
+  const handleEditColumn = useCallback(
+    (id: string, label: string, color: string) => {
+      updateColumn(id, { label, color });
+      toast.success('Column updated');
+    },
+    [updateColumn]
+  );
+
+  const handleDeleteColumn = useCallback(
+    (id: string) => {
+      deleteColumn(id);
+      toast.success('Column deleted');
+    },
+    [deleteColumn]
+  );
+
+  // Dynamic grid: 1 col on mobile, up to 4 on wide screens
+  const gridCols =
+    columns.length === 1 ? 'grid-cols-1' :
+    columns.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+    columns.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
+    'grid-cols-1 md:grid-cols-2 xl:grid-cols-4';
+
+  const firstColId = columns[0]?.id ?? 'planning';
+
   return (
     <div className={cn('min-h-screen bg-background transition-colors', dark && 'dark')}>
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-[1400px] px-4 py-6">
 
         {/* ── Top bar ──────────────────────────────────────────────────────── */}
         <header className="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -99,7 +129,9 @@ export default function App() {
               <h1 className="text-xl font-semibold leading-none text-foreground">
                 Task Dashboard
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">A Kanban task dashboard built with React 18, Zustand, TanStack Query, and Tailwind CSS.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                A Kanban task dashboard built with React 18, Zustand, and Tailwind CSS.
+              </p>
             </div>
           </div>
 
@@ -110,6 +142,14 @@ export default function App() {
               aria-label="Toggle dark mode"
             >
               {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              onClick={openManage}
+              className="flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-accent hover:text-foreground"
+              title="Board settings"
+            >
+              <Settings size={16} />
+              Manage
             </button>
             <button
               onClick={() => openModal()}
@@ -156,8 +196,8 @@ export default function App() {
               className="h-11 min-w-[180px] cursor-pointer appearance-none rounded-xl border border-border/80 bg-white py-2.5 pl-10 pr-10 text-sm font-medium text-foreground shadow-[0_8px_20px_-14px_rgba(0,0,0,0.45)] outline-none transition-all hover:border-primary/40 hover:shadow-[0_10px_24px_-14px_rgba(99,102,241,0.45)] focus:border-ring focus:ring-3 focus:ring-ring/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             >
               <option value="All">All categories</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.label}</option>
               ))}
             </select>
           </div>
@@ -165,15 +205,17 @@ export default function App() {
 
         {/* ── Kanban board ──────────────────────────────────────────────────── */}
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {KANBAN_COLUMNS.map((col) => (
+          <div className={cn('grid gap-3', gridCols)}>
+            {columns.map((col) => (
               <KanbanColumn
                 key={col.id}
                 column={col}
-                tasks={tasksByColumn[col.id]}
+                tasks={tasksByColumn[col.id] ?? []}
                 onAddTask={(colId) => openModal(undefined, colId)}
                 onEditTask={(task) => openModal(task.id)}
                 onDeleteTask={handleDelete}
+                onEditColumn={handleEditColumn}
+                onDeleteColumn={handleDeleteColumn}
               />
             ))}
           </div>
@@ -198,9 +240,14 @@ export default function App() {
                   col: editingTask.col,
                   due: editingTask.due,
                 }
-              : { col: (activeColumn as Task['col']) ?? 'planning' }
+              : { col: activeColumn ?? firstColId }
           }
         />
+      </Suspense>
+
+      {/* ── Manage Modal ──────────────────────────────────────────────────────── */}
+      <Suspense fallback={null}>
+        <ManageModal open={manageOpen} onClose={closeManage} />
       </Suspense>
 
       {/* ── Toast notifications ───────────────────────────────────────────────── */}

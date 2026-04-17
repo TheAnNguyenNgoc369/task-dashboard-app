@@ -7,11 +7,14 @@ interface UIState {
   modalOpen: boolean;
   editingTaskId: string | null;
   activeColumn: string | null;
+  manageOpen: boolean;
   toggleDark: () => void;
   setSearch: (q: string) => void;
   setCategoryFilter: (cat: string) => void;
   openModal: (taskId?: string, col?: string) => void;
   closeModal: () => void;
+  openManage: () => void;
+  closeManage: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -21,6 +24,7 @@ export const useUIStore = create<UIState>((set) => ({
   modalOpen: false,
   editingTaskId: null,
   activeColumn: null,
+  manageOpen: false,
 
   toggleDark: () =>
     set((s) => {
@@ -37,4 +41,7 @@ export const useUIStore = create<UIState>((set) => ({
 
   closeModal: () =>
     set({ modalOpen: false, editingTaskId: null, activeColumn: null }),
+
+  openManage: () => set({ manageOpen: true }),
+  closeManage: () => set({ manageOpen: false }),
 }));

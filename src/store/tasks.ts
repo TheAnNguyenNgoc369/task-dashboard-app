@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Task, TaskFormData, Column } from '../types';
+import type { Task, TaskFormData } from '../types';
 import { SAMPLE_TASKS } from '../lib/sampleData';
 
 interface TasksState {
@@ -8,8 +8,8 @@ interface TasksState {
   addTask: (data: TaskFormData) => Task;
   updateTask: (id: string, data: Partial<TaskFormData>) => void;
   deleteTask: (id: string) => void;
-  moveTask: (id: string, col: Column) => void;
-  reorderTasks: (col: Column, fromIndex: number, toIndex: number) => void;
+  moveTask: (id: string, col: string) => void;
+  reorderTasks: (col: string, fromIndex: number, toIndex: number) => void;
 }
 
 export const useTasksStore = create<TasksState>()(
@@ -50,9 +50,7 @@ export const useTasksStore = create<TasksState>()(
         set((s) => {
           const colTasks = s.tasks.filter((t) => t.col === col);
           const [moved] = colTasks.splice(fromIndex, 1);
-          if (!moved) {
-            return { tasks: s.tasks };
-          }
+          if (!moved) return { tasks: s.tasks };
           colTasks.splice(toIndex, 0, moved);
           const others = s.tasks.filter((t) => t.col !== col);
           return { tasks: [...others, ...colTasks] };
@@ -64,16 +62,12 @@ export const useTasksStore = create<TasksState>()(
       storage: createJSONStorage(() => localStorage),
       migrate: (persistedState) => {
         const state = persistedState as { tasks?: Array<Omit<Task, 'col'> & { col?: string }> } | undefined;
-
-        if (!state?.tasks) {
-          return { tasks: SAMPLE_TASKS };
-        }
-
+        if (!state?.tasks) return { tasks: SAMPLE_TASKS };
         return {
           ...state,
           tasks: state.tasks.map((task) => ({
             ...task,
-            col: task.col === 'backlog' ? 'planning' : (task.col as Column),
+            col: task.col === 'backlog' ? 'planning' : (task.col ?? 'planning'),
           })),
         };
       },

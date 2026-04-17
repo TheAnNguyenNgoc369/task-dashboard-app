@@ -27,15 +27,15 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import { CATEGORIES } from '../lib/sampleData';
-import type { TaskFormData, Column } from '../types';
+import { useBoardStore } from '../store/board';
+import type { TaskFormData } from '../types';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(120),
   desc: z.string().max(400).optional(),
-  priority: z.enum(['high', 'med', 'low']),
-  category: z.enum(['Work', 'Personal', 'Urgent', 'Design', 'Research']),
-  col: z.enum(['planning', 'progress', 'done']),
+  priority: z.string().min(1, 'Priority is required'),
+  category: z.string().min(1, 'Category is required'),
+  col: z.string().min(1, 'Status is required'),
   due: z.string().optional(),
 });
 
@@ -54,14 +54,20 @@ export function TaskModal({
   defaultValues,
   mode,
 }: TaskModalProps) {
+  const { columns, categories, priorities } = useBoardStore();
+
+  const firstColId = columns[0]?.id ?? 'planning';
+  const firstPriId = priorities[0]?.id ?? 'med';
+  const firstCatId = categories[0]?.id ?? 'Work';
+
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: '',
       desc: '',
-      priority: 'med',
-      category: 'Work',
-      col: (defaultValues?.col as Column) ?? 'planning',
+      priority: firstPriId,
+      category: firstCatId,
+      col: defaultValues?.col ?? firstColId,
       due: '',
       ...defaultValues,
     },
@@ -69,17 +75,17 @@ export function TaskModal({
 
   useEffect(() => {
     if (!open) return;
-
     form.reset({
       title: '',
       desc: '',
-      priority: 'med',
-      category: 'Work',
-      col: (defaultValues?.col as Column) ?? 'planning',
+      priority: firstPriId,
+      category: firstCatId,
+      col: defaultValues?.col ?? firstColId,
       due: '',
       ...defaultValues,
     });
-  }, [defaultValues, form, open]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues, open]);
 
   const handleSubmit = form.handleSubmit((data) => {
     onSubmit(data);
@@ -153,9 +159,11 @@ export function TaskModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="high">🔴 High</SelectItem>
-                        <SelectItem value="med">🟠 Medium</SelectItem>
-                        <SelectItem value="low">🟢 Low</SelectItem>
+                        {priorities.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.emoji} {p.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -177,9 +185,13 @@ export function TaskModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CATEGORIES.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
+                        {categories.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            <span
+                              className="mr-1.5 inline-block h-2 w-2 rounded-full"
+                              style={{ background: c.color }}
+                            />
+                            {c.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -203,9 +215,15 @@ export function TaskModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="planning">Planning</SelectItem>
-                        <SelectItem value="progress">In Progress</SelectItem>
-                        <SelectItem value="done">Done</SelectItem>
+                        {columns.map((col) => (
+                          <SelectItem key={col.id} value={col.id}>
+                            <span
+                              className="mr-1.5 inline-block h-2 w-2 rounded-full"
+                              style={{ background: col.color }}
+                            />
+                            {col.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

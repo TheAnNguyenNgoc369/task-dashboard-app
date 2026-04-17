@@ -11,57 +11,80 @@ interface AnalyticsRowProps {
   data: AnalyticsData;
 }
 
-const PIE_DATA_KEYS = [
-  { key: 'done',     label: 'Done',        color: '#22c55e' },
-  { key: 'progress', label: 'In Progress', color: '#f97316' },
-  { key: 'planning',  label: 'Planning',     color: '#818cf8' },
-] as const;
-
-const STAT_CARDS = (d: AnalyticsData) => [
-  { label: 'Total tasks', value: d.total, sub: `${d.highPriority} high priority`, color: '#2563eb' },
-  { label: 'Completed', value: `${d.completionPct}%`, sub: `${d.done} of ${d.total} done`, color: '#22c55e' },
-  { label: 'In progress', value: d.progress, sub: 'active tasks', color: '#f97316' },
-  { label: 'Planning', value: d.planning, sub: 'not started', color: '#6366f1' },
-];
-
 export function AnalyticsRow({ data }: AnalyticsRowProps) {
-  const pieData = PIE_DATA_KEYS.map((d) => ({
-    name: d.label,
-    value: data[d.key],
-    color: d.color,
-  }));
+  const pieData = data.byColumn
+    .filter((c) => c.count > 0 || data.total === 0)
+    .map((c) => ({ name: c.label, value: c.count, color: c.color }));
+
+  // Show at least an empty slice when there's no data
+  const safePieData = pieData.length > 0 ? pieData : [{ name: 'Empty', value: 1, color: '#e2e8f0' }];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
-      {/* Stat cards */}
-      {STAT_CARDS(data).map((card) => (
+      {/* Total tasks */}
+      <div
+        className="rounded-xl border border-border bg-card p-4 shadow-sm"
+        style={{
+          background: 'linear-gradient(135deg, color-mix(in oklch, #2563eb 12%, var(--card)), var(--card))',
+          boxShadow: 'inset 0 1px 0 color-mix(in oklch, #2563eb 16%, transparent)',
+        }}
+      >
+        <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Total tasks
+        </p>
+        <p className="text-3xl font-semibold tabular-nums" style={{ color: '#2563eb' }}>
+          {data.total}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {data.highPriority} high priority
+        </p>
+      </div>
+
+      {/* Completed */}
+      <div
+        className="rounded-xl border border-border bg-card p-4 shadow-sm"
+        style={{
+          background: 'linear-gradient(135deg, color-mix(in oklch, #22c55e 12%, var(--card)), var(--card))',
+          boxShadow: 'inset 0 1px 0 color-mix(in oklch, #22c55e 16%, transparent)',
+        }}
+      >
+        <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Completed
+        </p>
+        <p className="text-3xl font-semibold tabular-nums" style={{ color: '#22c55e' }}>
+          {data.completionPct}%
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {data.completedCount} of {data.total} done
+        </p>
+      </div>
+
+      {/* Per-column stat cards (up to 2 columns shown) */}
+      {data.byColumn.slice(0, 2).map((col) => (
         <div
-          key={card.label}
+          key={col.id}
           className="rounded-xl border border-border bg-card p-4 shadow-sm"
           style={{
-            background: `linear-gradient(135deg, color-mix(in oklch, ${card.color} 12%, var(--card)), var(--card))`,
-            boxShadow: `inset 0 1px 0 color-mix(in oklch, ${card.color} 16%, transparent)`,
+            background: `linear-gradient(135deg, color-mix(in oklch, ${col.color} 12%, var(--card)), var(--card))`,
+            boxShadow: `inset 0 1px 0 color-mix(in oklch, ${col.color} 16%, transparent)`,
           }}
         >
           <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {card.label}
+            {col.label}
           </p>
-          <p
-            className="text-3xl font-semibold tabular-nums"
-            style={{ color: card.color }}
-          >
-            {card.value}
+          <p className="text-3xl font-semibold tabular-nums" style={{ color: col.color }}>
+            {col.count}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">{card.sub}</p>
+          <p className="mt-1 text-sm text-muted-foreground">tasks</p>
         </div>
       ))}
 
-      {/* Pie chart card (spans 1 column) */}
+      {/* Pie chart card */}
       <div className="col-span-2 flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:col-span-3 lg:col-span-1">
         <ResponsiveContainer width={80} height={80}>
           <PieChart>
             <Pie
-              data={pieData}
+              data={safePieData}
               cx="50%"
               cy="50%"
               innerRadius={24}
@@ -70,7 +93,7 @@ export function AnalyticsRow({ data }: AnalyticsRowProps) {
               dataKey="value"
               strokeWidth={0}
             >
-              {pieData.map((entry, i) => (
+              {safePieData.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
             </Pie>
@@ -85,14 +108,15 @@ export function AnalyticsRow({ data }: AnalyticsRowProps) {
           </PieChart>
         </ResponsiveContainer>
 
-        <div className="flex flex-col gap-2">
-          {PIE_DATA_KEYS.map((d) => (
-            <div key={d.key} className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-2 overflow-hidden">
+          {data.byColumn.map((col) => (
+            <div key={col.id} className="flex items-center gap-2 text-sm text-muted-foreground">
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: d.color }}
+                style={{ background: col.color }}
               />
-              {d.label}: <span className="font-semibold text-foreground">{data[d.key]}</span>
+              <span className="truncate">{col.label}:</span>
+              <span className="font-semibold text-foreground">{col.count}</span>
             </div>
           ))}
         </div>
