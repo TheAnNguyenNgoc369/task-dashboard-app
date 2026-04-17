@@ -43,12 +43,23 @@ export function useTasks() {
     const total = tasks.length;
     const doneColIds = new Set(columns.filter((c) => c.isDone).map((c) => c.id));
     const completedCount = tasks.filter((t) => doneColIds.has(t.col)).length;
+    const activeCount = tasks.filter((t) => !doneColIds.has(t.col)).length;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const overdueCount = tasks.filter((t) => {
+      if (!t.due || doneColIds.has(t.col)) return false;
+      return new Date(t.due) < today;
+    }).length;
     const highPriorityDef = priorities.find(
       (p) => p.id === 'high' || p.label.toLowerCase() === 'high'
     );
     const highPriority = highPriorityDef
       ? tasks.filter((t) => t.priority === highPriorityDef.id).length
       : 0;
+    const priorityCounts: Record<string, number> = {};
+    for (const p of priorities) {
+      priorityCounts[p.id] = tasks.filter((t) => t.priority === p.id).length;
+    }
     const byColumn = columns.map((col) => ({
       id: col.id,
       label: col.label,
@@ -59,6 +70,9 @@ export function useTasks() {
       total,
       completedCount,
       highPriority,
+      activeCount,
+      overdueCount,
+      priorityCounts,
       completionPct: total ? Math.round((completedCount / total) * 100) : 0,
       byColumn,
     };

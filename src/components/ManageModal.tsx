@@ -43,12 +43,25 @@ import { cn } from '../lib/utils';
 
 type Tab = 'columns' | 'categories' | 'priorities' | 'dashboard';
 
+/** Stable order for the metric picker (not Object.keys order) */
+const DASHBOARD_KINDS: DashboardCardKind[] = [
+  'total',
+  'completed',
+  'active',
+  'overdue',
+  'priority',
+  'column',
+  'distribution',
+];
+
 const KIND_LABELS: Record<DashboardCardKind, string> = {
   total: 'Total tasks',
-  completed: 'Completion %',
-  high_priority: 'High priority',
-  column: 'Tasks in column',
-  distribution: 'Distribution chart',
+  completed: 'Completion rate',
+  active: 'Active (not done)',
+  overdue: 'Overdue',
+  priority: 'By priority',
+  column: 'Single column',
+  distribution: 'Top 4 columns',
 };
 
 interface ManageModalProps {
@@ -379,6 +392,7 @@ function PrioritiesTab() {
 function DashboardTab() {
   const {
     columns,
+    priorities,
     dashboardCards,
     addDashboardCard,
     updateDashboardCard,
@@ -392,11 +406,13 @@ function DashboardTab() {
     color: string;
     kind: DashboardCardKind;
     columnId: string;
-  }>({ title: '', color: '#6366f1', kind: 'total', columnId: '' });
+    priorityId: string;
+  }>({ title: '', color: '#6366f1', kind: 'total', columnId: '', priorityId: '' });
 
   const [adding, setAdding] = useState(false);
 
   const firstCol = columns[0]?.id ?? '';
+  const firstPri = priorities[0]?.id ?? 'med';
 
   const startEdit = (c: DashboardCard) => {
     setEditingId(c.id);
@@ -405,6 +421,7 @@ function DashboardTab() {
       color: c.color,
       kind: c.kind,
       columnId: c.columnId ?? firstCol,
+      priorityId: c.priorityId ?? firstPri,
     });
   };
 
@@ -412,11 +429,16 @@ function DashboardTab() {
     if (!draft.title.trim()) return;
     const columnId =
       draft.kind === 'column' ? (draft.columnId || firstCol) : undefined;
+    const priorityId =
+      draft.kind === 'priority' ? (draft.priorityId || firstPri) : undefined;
+    if (draft.kind === 'column' && !columnId) return;
+    if (draft.kind === 'priority' && !priorityId) return;
     updateDashboardCard(id, {
       title: draft.title.trim(),
       color: draft.color,
       kind: draft.kind,
       columnId,
+      priorityId,
     });
     setEditingId(null);
   };
@@ -425,14 +447,24 @@ function DashboardTab() {
     if (!draft.title.trim()) return;
     const columnId =
       draft.kind === 'column' ? (draft.columnId || firstCol) : undefined;
+    const priorityId =
+      draft.kind === 'priority' ? (draft.priorityId || firstPri) : undefined;
     if (draft.kind === 'column' && !columnId) return;
+    if (draft.kind === 'priority' && !priorityId) return;
     addDashboardCard({
       title: draft.title.trim(),
       color: draft.color,
       kind: draft.kind,
       columnId,
+      priorityId,
     });
-    setDraft({ title: '', color: '#6366f1', kind: 'total', columnId: firstCol });
+    setDraft({
+      title: '',
+      color: '#6366f1',
+      kind: 'total',
+      columnId: firstCol,
+      priorityId: firstPri,
+    });
     setAdding(false);
   };
 
@@ -498,14 +530,19 @@ function DashboardTab() {
                             <Select
                               value={draft.kind}
                               onValueChange={(v) =>
-                                setDraft((d) => ({ ...d, kind: v as DashboardCardKind }))
+                                setDraft((d) => ({
+                                  ...d,
+                                  kind: v as DashboardCardKind,
+                                  columnId: d.columnId || firstCol,
+                                  priorityId: d.priorityId || firstPri,
+                                }))
                               }
                             >
                               <SelectTrigger className="h-8 w-full text-sm sm:w-[200px]">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {(Object.keys(KIND_LABELS) as DashboardCardKind[]).map((k) => (
+                                {DASHBOARD_KINDS.map((k) => (
                                   <SelectItem key={k} value={k}>
                                     {KIND_LABELS[k]}
                                   </SelectItem>
@@ -526,6 +563,25 @@ function DashboardTab() {
                                   {columns.map((col) => (
                                     <SelectItem key={col.id} value={col.id}>
                                       {col.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                            {draft.kind === 'priority' && (
+                              <Select
+                                value={draft.priorityId || firstPri}
+                                onValueChange={(v) =>
+                                  setDraft((d) => ({ ...d, priorityId: v }))
+                                }
+                              >
+                                <SelectTrigger className="h-8 w-full text-sm sm:w-[180px]">
+                                  <SelectValue placeholder="Priority" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {priorities.map((p) => (
+                                    <SelectItem key={p.id} value={p.id}>
+                                      {p.label}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -568,6 +624,9 @@ function DashboardTab() {
                               {KIND_LABELS[card.kind]}
                               {card.kind === 'column' && card.columnId
                                 ? ` · ${columns.find((c) => c.id === card.columnId)?.label ?? card.columnId}`
+                                : ''}
+                              {card.kind === 'priority' && card.priorityId
+                                ? ` · ${priorities.find((p) => p.id === card.priorityId)?.label ?? card.priorityId}`
                                 : ''}
                             </p>
                           </div>
@@ -622,14 +681,19 @@ function DashboardTab() {
             <Select
               value={draft.kind}
               onValueChange={(v) =>
-                setDraft((d) => ({ ...d, kind: v as DashboardCardKind, columnId: d.columnId || firstCol }))
+                setDraft((d) => ({
+                  ...d,
+                  kind: v as DashboardCardKind,
+                  columnId: d.columnId || firstCol,
+                  priorityId: d.priorityId || firstPri,
+                }))
               }
             >
               <SelectTrigger className="h-8 w-full text-sm sm:w-[200px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(KIND_LABELS) as DashboardCardKind[]).map((k) => (
+                {DASHBOARD_KINDS.map((k) => (
                   <SelectItem key={k} value={k}>
                     {KIND_LABELS[k]}
                   </SelectItem>
@@ -648,6 +712,23 @@ function DashboardTab() {
                   {columns.map((col) => (
                     <SelectItem key={col.id} value={col.id}>
                       {col.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {draft.kind === 'priority' && (
+              <Select
+                value={draft.priorityId || firstPri}
+                onValueChange={(v) => setDraft((d) => ({ ...d, priorityId: v }))}
+              >
+                <SelectTrigger className="h-8 w-full text-sm sm:w-[180px]">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorities.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -672,6 +753,7 @@ function DashboardTab() {
               color: '#6366f1',
               kind: 'total',
               columnId: firstCol,
+              priorityId: firstPri,
             });
             setAdding(true);
           }}

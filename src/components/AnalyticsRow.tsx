@@ -12,6 +12,15 @@ interface AnalyticsRowProps {
   data: AnalyticsData;
 }
 
+const TOP_N = 4;
+
+function topColumnsByCount(data: AnalyticsData, n: number) {
+  return [...data.byColumn]
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, n);
+}
+
 function resolveStatCard(
   card: DashboardCard,
   data: AnalyticsData
@@ -20,23 +29,36 @@ function resolveStatCard(
     case 'total':
       return {
         main: String(data.total),
-        sub: `${data.highPriority} high priority`,
+        sub: `${data.activeCount} active`,
       };
     case 'completed':
       return {
         main: `${data.completionPct}%`,
         sub: `${data.completedCount} of ${data.total} done`,
       };
-    case 'high_priority':
+    case 'active':
       return {
-        main: String(data.highPriority),
-        sub: 'high priority tasks',
+        main: String(data.activeCount),
+        sub: 'not in done',
       };
+    case 'overdue':
+      return {
+        main: String(data.overdueCount),
+        sub: 'past due',
+      };
+    case 'priority': {
+      const id = card.priorityId ?? '';
+      const n = data.priorityCounts[id] ?? 0;
+      return {
+        main: String(n),
+        sub: id ? 'tasks' : 'pick a priority',
+      };
+    }
     case 'column': {
       const col = data.byColumn.find((c) => c.id === card.columnId);
       return {
         main: String(col?.count ?? 0),
-        sub: col ? 'tasks' : 'column not found',
+        sub: col ? 'tasks' : 'column missing',
       };
     }
     default:
@@ -51,10 +73,8 @@ function DistributionBlock({
   card: DashboardCard;
   data: AnalyticsData;
 }) {
-  const pieData = data.byColumn
-    .filter((c) => c.count > 0 || data.total === 0)
-    .map((c) => ({ name: c.label, value: c.count, color: c.color }));
-
+  const top = topColumnsByCount(data, TOP_N);
+  const pieData = top.map((c) => ({ name: c.label, value: c.count, color: c.color }));
   const safePieData =
     pieData.length > 0 ? pieData : [{ name: 'Empty', value: 1, color: '#e2e8f0' }];
 
@@ -93,18 +113,20 @@ function DistributionBlock({
         </PieChart>
       </ResponsiveContainer>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {card.title}
         </p>
-        {data.byColumn.map((col) => (
+        {top.map((col) => (
           <div key={col.id} className="flex items-center gap-2 text-sm text-muted-foreground">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ background: col.color }}
             />
-            <span className="truncate">{col.label}:</span>
-            <span className="font-semibold text-foreground">{col.count}</span>
+            <span className="min-w-0 truncate">{col.label}</span>
+            <span className="ml-auto shrink-0 font-semibold tabular-nums text-foreground">
+              {col.count}
+            </span>
           </div>
         ))}
       </div>

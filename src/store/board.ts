@@ -23,11 +23,10 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
 ];
 
 export const DEFAULT_DASHBOARD_CARDS: DashboardCard[] = [
-  { id: 'dc_total', title: 'Total tasks', color: '#2563eb', kind: 'total' },
-  { id: 'dc_completed', title: 'Completed', color: '#22c55e', kind: 'completed' },
-  { id: 'dc_col_planning', title: 'Planning', color: '#818cf8', kind: 'column', columnId: 'planning' },
-  { id: 'dc_col_progress', title: 'In Progress', color: '#f97316', kind: 'column', columnId: 'progress' },
-  { id: 'dc_dist', title: 'By column', color: '#64748b', kind: 'distribution' },
+  { id: 'dc_total', title: 'Total', color: '#2563eb', kind: 'total' },
+  { id: 'dc_done', title: 'Done rate', color: '#22c55e', kind: 'completed' },
+  { id: 'dc_active', title: 'Active', color: '#f97316', kind: 'active' },
+  { id: 'dc_dist', title: 'Top columns', color: '#64748b', kind: 'distribution' },
 ];
 
 interface BoardState {
@@ -119,9 +118,13 @@ export const useBoardStore = create<BoardState>()(
 
       updateDashboardCard: (id, data) =>
         set((s) => ({
-          dashboardCards: s.dashboardCards.map((c) =>
-            c.id === id ? { ...c, ...data } : c
-          ),
+          dashboardCards: s.dashboardCards.map((c) => {
+            if (c.id !== id) return c;
+            const next: DashboardCard = { ...c, ...data };
+            if (next.kind !== 'column') delete next.columnId;
+            if (next.kind !== 'priority') delete next.priorityId;
+            return next;
+          }),
         })),
 
       deleteDashboardCard: (id) =>
@@ -140,12 +143,12 @@ export const useBoardStore = create<BoardState>()(
     }),
     {
       name: 'mc_board',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       migrate: (persistedState, version) => {
         let s = persistedState as {
           priorities?: PriorityDef[];
-          dashboardCards?: DashboardCard[];
+          dashboardCards?: Array<DashboardCard & { kind?: string }>;
         };
 
         if (version < 2 && s?.priorities) {
@@ -161,6 +164,23 @@ export const useBoardStore = create<BoardState>()(
 
         if (version < 3 && !s.dashboardCards?.length) {
           s = { ...s, dashboardCards: DEFAULT_DASHBOARD_CARDS };
+        }
+
+        if (version < 4 && s.dashboardCards?.length) {
+          s = {
+            ...s,
+            dashboardCards: s.dashboardCards.map((c) => {
+              const kind = (c as { kind?: string }).kind;
+              if (kind === 'high_priority') {
+                return {
+                  ...c,
+                  kind: 'priority' as const,
+                  priorityId: 'high',
+                };
+              }
+              return c as DashboardCard;
+            }),
+          };
         }
 
         return s;

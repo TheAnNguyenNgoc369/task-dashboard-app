@@ -47,7 +47,9 @@ export interface KanbanColumn {
 export type DashboardCardKind =
   | 'total'
   | 'completed'
-  | 'high_priority'
+  | 'active'
+  | 'overdue'
+  | 'priority'
   | 'column'
   | 'distribution';
 
@@ -57,14 +59,20 @@ export interface DashboardCard {
   title: string;
   color: string;
   kind: DashboardCardKind;
-  /** Required when kind === 'column' */
+  /** When kind === 'column' */
   columnId?: string;
+  /** When kind === 'priority' */
+  priorityId?: string;
 }
 
 export interface AnalyticsData {
   total: number;
   completedCount: number;
   highPriority: number;
+  activeCount: number;
+  overdueCount: number;
+  /** Task counts keyed by priority id */
+  priorityCounts: Record<string, number>;
   completionPct: number;
   byColumn: Array<{ id: string; label: string; color: string; count: number }>;
 }
