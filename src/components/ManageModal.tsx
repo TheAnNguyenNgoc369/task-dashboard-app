@@ -61,7 +61,7 @@ const KIND_LABELS: Record<DashboardCardKind, string> = {
   overdue: 'Overdue',
   priority: 'By priority',
   column: 'Single column',
-  distribution: 'Top 4 columns',
+  distribution: 'Distribution Chart',
 };
 
 interface ManageModalProps {

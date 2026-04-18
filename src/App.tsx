@@ -1,6 +1,6 @@
-import { Suspense, lazy, useCallback, useEffect } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import { Moon, Sun, Plus, Search, ClipboardList, Settings, X } from 'lucide-react';
+import { Moon, Sun, Plus, Search, ClipboardList, Settings, X, Check } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -43,10 +43,29 @@ export default function App() {
     openModal, closeModal,
     manageOpen, openManage, closeManage,
   } = useUIStore();
-  const { columns, categories, updateColumn, deleteColumn } = useBoardStore();
+  const { columns, categories, updateColumn, deleteColumn, addColumn } = useBoardStore();
 
   const { tasksByColumn, analytics } = useTasks();
   const editingTask = useTask(editingTaskId);
+
+  const [addingColumn, setAddingColumn] = useState(false);
+  const [newColName, setNewColName] = useState('');
+  const [newColColor, setNewColColor] = useState('#818cf8');
+
+  const handleAddColumn = useCallback(() => {
+    const name = newColName.trim() || 'New Column';
+    addColumn(name, newColColor);
+    setNewColName('');
+    setNewColColor('#818cf8');
+    setAddingColumn(false);
+    toast.success(`Column "${name}" added`);
+  }, [newColName, newColColor, addColumn]);
+
+  const handleCancelAddColumn = useCallback(() => {
+    setAddingColumn(false);
+    setNewColName('');
+    setNewColColor('#818cf8');
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -217,7 +236,7 @@ export default function App() {
         {/* ── Kanban board ──────────────────────────────────────────────────── */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="kanban-scroll-area overflow-x-auto pb-3">
-            <div className="flex gap-3" style={{ minWidth: `${visibleColumns.length * 308}px` }}>
+            <div className="flex gap-3 items-start" style={{ minWidth: `${(visibleColumns.length + 1) * 308}px` }}>
               {visibleColumns.map((col) => (
                 <div key={col.id} className="w-[296px] shrink-0">
                   <KanbanColumn
@@ -231,6 +250,73 @@ export default function App() {
                   />
                 </div>
               ))}
+
+              {/* ── New column ──────────────────────────────────────────────── */}
+              <div className="shrink-0 w-[296px]">
+                {addingColumn ? (
+                  <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+                    {/* Mirrors the column header edit mode */}
+                    <div
+                      className="flex items-center gap-1.5 border-b border-border px-3.5 py-3"
+                      style={{
+                        background: `linear-gradient(135deg, color-mix(in oklch, ${newColColor} 16%, var(--card)), var(--card))`,
+                      }}
+                    >
+                      <input
+                        type="color"
+                        value={newColColor}
+                        onChange={(e) => setNewColColor(e.target.value)}
+                        className="h-6 w-6 shrink-0 cursor-pointer rounded border border-border bg-transparent p-0"
+                        title="Pick column color"
+                      />
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Column name"
+                        value={newColName}
+                        onChange={(e) => setNewColName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddColumn();
+                          if (e.key === 'Escape') handleCancelAddColumn();
+                        }}
+                        className="flex-1 rounded border border-primary/40 bg-background px-2 py-0.5 text-[13px] font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <button
+                        onClick={handleAddColumn}
+                        className="rounded p-0.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-950"
+                        title="Confirm"
+                      >
+                        <Check size={13} />
+                      </button>
+                      <button
+                        onClick={handleCancelAddColumn}
+                        className="rounded p-0.5 text-muted-foreground hover:bg-accent"
+                        title="Cancel"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                    {/* Body — mirrors droppable zone */}
+                    <div className="p-2.5">
+                      <button
+                        onClick={handleAddColumn}
+                        className="mt-0 flex w-full items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-[12px] text-muted-foreground transition-all hover:border-solid hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                      >
+                        <Plus size={13} />
+                        Add column
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setAddingColumn(true)}
+                    className="flex w-full items-center gap-2.5 rounded-xl border border-dashed border-border bg-card/50 px-3.5 py-3 text-[13px] font-semibold text-muted-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-card/90 hover:border-border hover:text-foreground"
+                  >
+                    <Plus size={14} />
+                    New column
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </DragDropContext>
