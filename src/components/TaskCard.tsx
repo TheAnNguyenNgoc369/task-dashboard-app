@@ -12,8 +12,6 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
-  draggableProps?: React.HTMLAttributes<HTMLDivElement>;
-  innerRef?: (el: HTMLDivElement | null) => void;
 }
 
 export const TaskCard = React.memo(function TaskCard({
@@ -23,8 +21,6 @@ export const TaskCard = React.memo(function TaskCard({
   onEdit,
   onDelete,
   dragHandleProps,
-  draggableProps,
-  innerRef,
 }: TaskCardProps) {
   const priorities = useBoardStore((s) => s.priorities);
   const categories = useBoardStore((s) => s.categories);
@@ -36,8 +32,6 @@ export const TaskCard = React.memo(function TaskCard({
 
   return (
     <div
-      ref={innerRef}
-      {...draggableProps}
       className={cn(
         'group relative rounded-xl border border-border bg-gradient-to-br from-card to-secondary p-3.5 text-foreground shadow-sm transition-all duration-150 dark:from-card dark:to-secondary dark:text-white',
         'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md hover:shadow-black/5',
