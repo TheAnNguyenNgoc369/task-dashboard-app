@@ -204,7 +204,7 @@ export default function App() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks…"
               className={cn(
-                'w-full rounded-lg border border-border bg-card py-2.5 pl-10 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20',
+                'h-11 w-full rounded-xl border border-border bg-card pl-10 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20',
                 search.trim() ? 'pr-10' : 'pr-3'
               )}
             />
@@ -278,7 +278,7 @@ export default function App() {
                   {/* ── New column ────────────────────────────────────────────── */}
                   <div className="shrink-0 w-[296px]">
                     {addingColumn ? (
-                      <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+                      <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm">
                         {/* Mirrors the column header edit mode */}
                         <div
                           className="flex items-center gap-1.5 border-b border-border px-3.5 py-3"
@@ -334,7 +334,7 @@ export default function App() {
                     ) : (
                       <button
                         onClick={() => setAddingColumn(true)}
-                        className="flex w-full items-center gap-2.5 rounded-xl border border-dashed border-border bg-card/50 px-3.5 py-3 text-[13px] font-semibold text-muted-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-card/90 hover:border-border hover:text-foreground"
+                        className="flex w-full items-center gap-2.5 rounded-xl border border-dashed border-border bg-card/90 px-3.5 py-3 text-[13px] font-semibold text-muted-foreground shadow-sm transition-all hover:border-border hover:text-foreground"
                       >
                         <Plus size={14} />
                         New column

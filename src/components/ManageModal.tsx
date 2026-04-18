@@ -828,9 +828,9 @@ export function ManageModal({ open, onClose }: ManageModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[520px] bg-slate-50 text-popover-foreground dark:bg-card dark:text-white">
+      <DialogContent className="max-w-[520px]">
         <DialogHeader>
-          <DialogTitle className="text-foreground dark:text-white">
+          <DialogTitle>
             Board Settings
           </DialogTitle>
         </DialogHeader>

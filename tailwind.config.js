@@ -6,11 +6,17 @@ export default {
     extend: {
       colors: {
         border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         card: {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
         },
         primary: {
           DEFAULT: 'var(--primary)',
