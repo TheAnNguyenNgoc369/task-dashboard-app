@@ -41,7 +41,7 @@ export function KanbanColumn({
 
   return (
     <div className={cn(
-      'flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm transition-shadow',
+      'flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm transition-shadow',
       isDragging && 'shadow-2xl ring-2 ring-primary/30 rotate-[1deg]',
     )}>
       {/* Column header */}
@@ -151,15 +151,17 @@ export function KanbanColumn({
             {tasks.map((task, index) => (
               <Draggable key={task.id} draggableId={task.id} index={index}>
                 {(dragProvided, dragSnapshot) => (
-                  <div className="mb-2 last:mb-0">
+                  <div
+                    ref={dragProvided.innerRef}
+                    {...dragProvided.draggableProps}
+                    className="mb-2 last:mb-0"
+                  >
                     <TaskCard
                       task={task}
                       isDragging={dragSnapshot.isDragging}
                       isDoneColumn={column.isDone}
                       onEdit={onEditTask}
                       onDelete={onDeleteTask}
-                      innerRef={dragProvided.innerRef}
-                      draggableProps={dragProvided.draggableProps}
                       dragHandleProps={dragProvided.dragHandleProps ?? undefined}
                     />
                   </div>
