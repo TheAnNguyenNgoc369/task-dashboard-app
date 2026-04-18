@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Droppable, Draggable, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { Plus, Pencil, Trash2, Check, X, GripVertical } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import type { KanbanColumn as KanbanColumnType, Task } from '../types';
 import { cn } from '../lib/utils';
@@ -13,6 +13,8 @@ interface KanbanColumnProps {
   onDeleteTask: (id: string) => void;
   onEditColumn?: (id: string, label: string, color: string) => void;
   onDeleteColumn?: (id: string) => void;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  isDragging?: boolean;
 }
 
 export function KanbanColumn({
@@ -23,6 +25,8 @@ export function KanbanColumn({
   onDeleteTask,
   onEditColumn,
   onDeleteColumn,
+  dragHandleProps,
+  isDragging,
 }: KanbanColumnProps) {
   const [editing, setEditing] = useState(false);
   const [editLabel, setEditLabel] = useState(column.label);
@@ -36,10 +40,17 @@ export function KanbanColumn({
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+    <div className={cn(
+      'flex flex-col overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm transition-shadow',
+      isDragging && 'shadow-2xl ring-2 ring-primary/30 rotate-[1deg]',
+    )}>
       {/* Column header */}
       <div
-        className="flex items-center justify-between border-b border-border px-3.5 py-3"
+        {...(dragHandleProps ?? {})}
+        className={cn(
+          'flex items-center justify-between border-b border-border px-3.5 py-3',
+          dragHandleProps && 'cursor-grab active:cursor-grabbing select-none',
+        )}
         style={{
           background: `linear-gradient(135deg, color-mix(in oklch, ${column.color} 16%, var(--card)), var(--card))`,
         }}
@@ -78,6 +89,9 @@ export function KanbanColumn({
         ) : (
           <>
             <div className="flex items-center gap-2.5">
+              {dragHandleProps && (
+                <GripVertical size={13} className="shrink-0 text-muted-foreground/40" />
+              )}
               <span
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ background: column.color }}

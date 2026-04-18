@@ -38,6 +38,7 @@ interface BoardState {
   addColumn: (label: string, color: string) => KanbanColumn;
   updateColumn: (id: string, data: Partial<Omit<KanbanColumn, 'id'>>) => void;
   deleteColumn: (id: string) => void;
+  reorderColumns: (fromIndex: number, toIndex: number) => void;
 
   addPriority: (label: string, color: string) => void;
   updatePriority: (id: string, data: Partial<Omit<PriorityDef, 'id'>>) => void;
@@ -74,6 +75,15 @@ export const useBoardStore = create<BoardState>()(
 
       deleteColumn: (id) =>
         set((s) => ({ columns: s.columns.filter((c) => c.id !== id) })),
+
+      reorderColumns: (fromIndex, toIndex) =>
+        set((s) => {
+          const list = [...s.columns];
+          const [moved] = list.splice(fromIndex, 1);
+          if (!moved) return s;
+          list.splice(toIndex, 0, moved);
+          return { columns: list };
+        }),
 
       addPriority: (label, color) =>
         set((s) => ({
