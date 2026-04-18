@@ -14,10 +14,11 @@ export function useTasks() {
   const filteredTasks = useMemo(() => {
     const q = search.toLowerCase().trim();
     return tasks.filter((t) => {
+      const cat = String(t.category ?? '');
       const matchSearch =
         !q ||
         t.title.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q) ||
+        cat.toLowerCase().includes(q) ||
         (t.desc ?? '').toLowerCase().includes(q);
       const matchCategory =
         categoryFilter === 'All' || t.category === categoryFilter;
@@ -25,28 +26,44 @@ export function useTasks() {
     });
   }, [tasks, search, categoryFilter]);
 
-  const tasksByColumn = useMemo(() => {
-    const result: Record<string, Task[]> = {};
-    for (const col of columns) {
-      result[col.id] = filteredTasks.filter((t) => t.col === col.id);
-    }
-    // tasks assigned to a deleted column still appear under an 'orphan' key
-    for (const task of filteredTasks) {
-      if (!(task.col in result)) {
-        result[task.col] = [...(result[task.col] ?? []), task];
-      }
-    }
-    return result;
+  /** Tasks that appear on the Kanban (same column visibility as the board) */
+  const boardTasks = useMemo(() => {
+    const visibleColIds = new Set(
+      columns.filter((c) => c.visible !== false).map((c) => c.id),
+    );
+    return filteredTasks.filter((t) => visibleColIds.has(t.col));
   }, [filteredTasks, columns]);
 
+  const tasksByColumn = useMemo(() => {
+    const result: Record<string, Task[]> = {};
+    const knownColIds = new Set(columns.map((c) => c.id));
+
+    for (const col of columns) {
+      result[col.id] = boardTasks.filter((t) => t.col === col.id);
+    }
+
+    for (const task of filteredTasks) {
+      if (!knownColIds.has(task.col)) {
+        const list = result[task.col] ?? [];
+        if (!list.includes(task)) {
+          result[task.col] = [...list, task];
+        }
+      }
+    }
+
+    return result;
+  }, [boardTasks, filteredTasks, columns]);
+
+  /** Same task set as visible Kanban columns (search + category + column visibility) */
   const analytics = useMemo((): AnalyticsData => {
-    const total = tasks.length;
-    const doneColIds = new Set(columns.filter((c) => c.isDone).map((c) => c.id));
-    const completedCount = tasks.filter((t) => doneColIds.has(t.col)).length;
-    const activeCount = tasks.filter((t) => !doneColIds.has(t.col)).length;
+    const visibleCols = columns.filter((c) => c.visible !== false);
+    const total = boardTasks.length;
+    const doneColIds = new Set(visibleCols.filter((c) => c.isDone).map((c) => c.id));
+    const completedCount = boardTasks.filter((t) => doneColIds.has(t.col)).length;
+    const activeCount = boardTasks.filter((t) => !doneColIds.has(t.col)).length;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const overdueCount = tasks.filter((t) => {
+    const overdueCount = boardTasks.filter((t) => {
       if (!t.due || doneColIds.has(t.col)) return false;
       return new Date(t.due) < today;
     }).length;
@@ -54,17 +71,17 @@ export function useTasks() {
       (p) => p.id === 'high' || p.label.toLowerCase() === 'high'
     );
     const highPriority = highPriorityDef
-      ? tasks.filter((t) => t.priority === highPriorityDef.id).length
+      ? boardTasks.filter((t) => t.priority === highPriorityDef.id).length
       : 0;
     const priorityCounts: Record<string, number> = {};
     for (const p of priorities) {
-      priorityCounts[p.id] = tasks.filter((t) => t.priority === p.id).length;
+      priorityCounts[p.id] = boardTasks.filter((t) => t.priority === p.id).length;
     }
-    const byColumn = columns.map((col) => ({
+    const byColumn = visibleCols.map((col) => ({
       id: col.id,
       label: col.label,
       color: col.color,
-      count: tasks.filter((t) => t.col === col.id).length,
+      count: boardTasks.filter((t) => t.col === col.id).length,
     }));
     return {
       total,
@@ -76,7 +93,7 @@ export function useTasks() {
       completionPct: total ? Math.round((completedCount / total) * 100) : 0,
       byColumn,
     };
-  }, [tasks, columns, priorities]);
+  }, [boardTasks, columns, priorities]);
 
   return { tasks, filteredTasks, tasksByColumn, analytics };
 }
