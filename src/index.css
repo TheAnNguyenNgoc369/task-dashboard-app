@@ -83,6 +83,9 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply font-sans;
+  }
   body {
     @apply bg-background text-foreground;
     font-size: 17px;
@@ -92,14 +95,6 @@
       radial-gradient(circle at top right, color-mix(in oklch, var(--accent) 22%, transparent), transparent 30%),
       linear-gradient(180deg, color-mix(in oklch, var(--background) 94%, white), var(--background));
   }
-  html {
-    @apply font-sans;
-  }
-}
-
-@layer base {
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground; font-family: system-ui, -apple-system, sans-serif; font-size: 17px; line-height: 1.5; }
 }
 
 /* ── Kanban board scrollbar ──────────────────────────────────────────────── */
